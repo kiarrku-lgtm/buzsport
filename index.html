@@ -1,104 +1,136 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مباريات اليوم</title>
+<title>BuzSport – مباريات اليوم</title>
+
 <style>
 body{
   margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(180deg,#020617,#020617);
+  font-family:Tahoma, Arial;
+  background:#0b1220;
   color:#fff;
+  padding:15px;
 }
-header{
+
+h1{
   text-align:center;
-  padding:20px;
-  font-size:26px;
   color:#38bdf8;
 }
-button{
-  background:#0ea5e9;
-  color:#fff;
+
+.refresh{
+  display:block;
+  margin:15px auto;
+  background:#38bdf8;
+  color:#000;
+  padding:10px 18px;
   border:none;
-  padding:10px 15px;
   border-radius:10px;
+  font-weight:bold;
   cursor:pointer;
+}
+
+.card{
+  background:#111827;
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,.4);
+}
+
+.card h3{
+  margin:0 0 8px;
   font-size:16px;
 }
-.container{padding:15px}
-.card{
-  background:#0f172a;
-  border-radius:15px;
-  padding:15px;
-  margin-bottom:15px;
-}
-.time{opacity:.7}
-.servers button{
-  margin:5px 5px 0 0;
-  background:#22c55e;
-}
-.footer{
-  text-align:center;
-  opacity:.5;
+
+.time{
   font-size:13px;
-  padding:10px;
+  color:#9ca3af;
+  margin-bottom:10px;
 }
+
+.badge{
+  display:inline-block;
+  background:#1d4ed8;
+  padding:2px 8px;
+  border-radius:8px;
+  font-size:11px;
+  margin-bottom:8px;
+}
+
+.servers button{
+  background:#22c55e;
+  border:none;
+  border-radius:8px;
+  padding:6px 10px;
+  margin:4px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.servers button:nth-child(2){background:#f59e0b;}
+.servers button:nth-child(3){background:#ef4444;}
 </style>
 </head>
 
 <body>
 
-<header>⚽ مباريات اليوم</header>
+<h1>⚽ مباريات اليوم والقادمة</h1>
 
-<div class="container">
-  <button onclick="loadMatches()">🔄 تحديث المباريات</button>
-  <div id="matches"></div>
-</div>
+<button class="refresh" onclick="loadMatches()">🔄 تحديث المباريات</button>
 
-<div class="footer">BuzSport ©</div>
+<div id="matches"></div>
 
 <script>
-const proxy = "https://api.allorigins.win/raw?url=";
-const api = "https://www.scorebat.com/video-api/v3/";
+// ====== بيانات المباريات (تقدر تبدلها وقت ما بغيت) ======
+const matchesData = [
+  // مباريات اليوم
+  {title:"Real Madrid vs Barcelona", time:"21:00", status:"اليوم"},
+  {title:"Manchester City vs Arsenal", time:"18:30", status:"اليوم"},
+  {title:"Bayern Munich vs Dortmund", time:"20:45", status:"اليوم"},
 
-async function loadMatches(){
+  // مباريات قادمة
+  {title:"PSG vs Marseille", time:"غداً 21:00", status:"قادم"},
+  {title:"Wydad vs Raja", time:"غداً 22:00", status:"قادم"},
+  {title:"Al Ahly vs Zamalek", time:"بعد غد 20:00", status:"قادم"}
+];
+
+// ====== السيرفرات ======
+const servers = {
+  1: "https://www.yalla-live.tv/",
+  2: "https://kooora-live.io/",
+  3: "https://livehd7.cc/"
+};
+
+// ====== تحميل المباريات ======
+function loadMatches(){
   const box = document.getElementById("matches");
-  box.innerHTML = "⏳ جاري تحميل المباريات...";
-  try{
-    const res = await fetch(proxy + encodeURIComponent(api));
-    const data = await res.json();
-    box.innerHTML = "";
+  box.innerHTML = "";
 
-    if(!data.response) throw "no data";
-
-    data.response
-    .filter(m => new Date(m.date) > new Date(Date.now() - 3600000))
-    .slice(0,10)
-    .forEach(m=>{
-      const time = new Date(m.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      box.innerHTML += `
+  matchesData.forEach(match => {
+    box.innerHTML += `
       <div class="card">
-        <h3>${m.title}</h3>
-        <div class="time">⏰ ${time}</div>
+        <span class="badge">${match.status}</span>
+        <h3>${match.title}</h3>
+        <div class="time">⏰ ${match.time}</div>
 
         <div class="servers">
-          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 1</button>
-          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 2</button>
-          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 3</button>
+          <button onclick="openServer(1)">سيرفر 1</button>
+          <button onclick="openServer(2)">سيرفر 2</button>
+          <button onclick="openServer(3)">سيرفر 3</button>
         </div>
-      </div>`;
-    });
-
-  }catch(e){
-    box.innerHTML = "⚠️ تعذر تحميل المباريات حالياً";
-  }
+      </div>
+    `;
+  });
 }
 
-function openServer(url){
-  window.open(url,"_blank");
+// ====== فتح السيرفر ======
+function openServer(n){
+  window.open(servers[n], "_blank");
 }
 
+// تحميل تلقائي
 loadMatches();
 </script>
 
