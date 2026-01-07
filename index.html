@@ -1,3 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مباريات اليوم</title>
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg,#020617,#020617);
+  color:#fff;
+}
+header{
+  text-align:center;
+  padding:20px;
+  font-size:26px;
+  color:#38bdf8;
+}
+button{
+  background:#0ea5e9;
+  color:#fff;
+  border:none;
+  padding:10px 15px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+}
+.container{padding:15px}
+.card{
+  background:#0f172a;
+  border-radius:15px;
+  padding:15px;
+  margin-bottom:15px;
+}
+.time{opacity:.7}
+.servers button{
+  margin:5px 5px 0 0;
+  background:#22c55e;
+}
+.footer{
+  text-align:center;
+  opacity:.5;
+  font-size:13px;
+  padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>⚽ مباريات اليوم</header>
+
+<div class="container">
+  <button onclick="loadMatches()">🔄 تحديث المباريات</button>
+  <div id="matches"></div>
+</div>
+
+<div class="footer">BuzSport ©</div>
+
 <script>
 const proxy = "https://api.allorigins.win/raw?url=";
 const api = "https://www.scorebat.com/video-api/v3/";
@@ -5,57 +65,42 @@ const api = "https://www.scorebat.com/video-api/v3/";
 async function loadMatches(){
   const box = document.getElementById("matches");
   box.innerHTML = "⏳ جاري تحميل المباريات...";
-
   try{
     const res = await fetch(proxy + encodeURIComponent(api));
     const data = await res.json();
-
-    // حماية من أي تغيير فـ API
-    const matches = data?.response || [];
-
-    if(matches.length === 0){
-      box.innerHTML = "⚠️ لا توجد مباريات حالياً";
-      return;
-    }
-
     box.innerHTML = "";
 
-    matches
-      .filter(m => m.date)
-      .slice(0,10)
-      .forEach(m => {
-        let time = "—";
-        try{
-          time = new Date(m.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        }catch{}
+    if(!data.response) throw "no data";
 
-        box.innerHTML += `
-          <div class="card">
-            <h3>${m.title || "مباراة كرة قدم"}</h3>
-            <div class="time">⏰ ${time}</div>
+    data.response
+    .filter(m => new Date(m.date) > new Date(Date.now() - 3600000))
+    .slice(0,10)
+    .forEach(m=>{
+      const time = new Date(m.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      box.innerHTML += `
+      <div class="card">
+        <h3>${m.title}</h3>
+        <div class="time">⏰ ${time}</div>
 
-            <div class="servers">
-              <button onclick="openServer('${m.matchviewUrl}')">سيرفر 1</button>
-              <button onclick="openServer('${m.matchviewUrl}')">سيرفر 2</button>
-              <button onclick="openServer('${m.matchviewUrl}')">سيرفر 3</button>
-            </div>
-          </div>
-        `;
-      });
+        <div class="servers">
+          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 1</button>
+          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 2</button>
+          <button onclick="openServer('${m.matchviewUrl}')">سيرفر 3</button>
+        </div>
+      </div>`;
+    });
 
-  }catch(err){
-    console.error(err);
-    box.innerHTML = "⚠️ وقع خطأ في تحميل المباريات";
+  }catch(e){
+    box.innerHTML = "⚠️ تعذر تحميل المباريات حالياً";
   }
 }
 
 function openServer(url){
-  if(!url){
-    alert("السيرفر غير متوفر");
-    return;
-  }
   window.open(url,"_blank");
 }
 
 loadMatches();
 </script>
+
+</body>
+</html>
