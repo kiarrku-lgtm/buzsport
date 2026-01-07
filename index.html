@@ -1,0 +1,56 @@
+<script>
+async function fetchMatches() {
+    const container = document.getElementById('matches-container');
+
+    // API عامة (مباريات اليوم) – بلا توكن
+    const apiUrl = 'https://site.api.espn.com/apis/v2/sports/soccer/all/scoreboard';
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        container.innerHTML = '';
+
+        if (!data.events || data.events.length === 0) {
+            container.innerHTML = '<div class="loading">لا توجد مباريات اليوم</div>';
+            return;
+        }
+
+        data.events.forEach(event => {
+            const match = event.competitions[0];
+            const home = match.competitors.find(t => t.homeAway === 'home');
+            const away = match.competitors.find(t => t.homeAway === 'away');
+
+            const matchTime = new Date(event.date).toLocaleTimeString('ar-MA', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const html = `
+                <div class="match-card">
+                    <div class="team">
+                        <img src="${home.team.logo}">
+                        <span>${home.team.displayName}</span>
+                    </div>
+                    <div class="info">
+                        <div class="league">${event.leagues[0].name}</div>
+                        <div class="time">${matchTime}</div>
+                        <div class="status-badge">${event.status.type.description}</div>
+                    </div>
+                    <div class="team">
+                        <img src="${away.team.logo}">
+                        <span>${away.team.displayName}</span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+    } catch (e) {
+        container.innerHTML = '<div class="loading">وقع خطأ، عاود حدّث الصفحة</div>';
+    }
+}
+
+fetchMatches();
+</script>
