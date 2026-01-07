@@ -1,56 +1,67 @@
-<script>
-async function fetchMatches() {
-    const container = document.getElementById('matches-container');
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>BuzSport – مباريات اليوم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    // API عامة (مباريات اليوم) – بلا توكن
-    const apiUrl = 'https://site.api.espn.com/apis/v2/sports/soccer/all/scoreboard';
-
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        container.innerHTML = '';
-
-        if (!data.events || data.events.length === 0) {
-            container.innerHTML = '<div class="loading">لا توجد مباريات اليوم</div>';
-            return;
-        }
-
-        data.events.forEach(event => {
-            const match = event.competitions[0];
-            const home = match.competitors.find(t => t.homeAway === 'home');
-            const away = match.competitors.find(t => t.homeAway === 'away');
-
-            const matchTime = new Date(event.date).toLocaleTimeString('ar-MA', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-
-            const html = `
-                <div class="match-card">
-                    <div class="team">
-                        <img src="${home.team.logo}">
-                        <span>${home.team.displayName}</span>
-                    </div>
-                    <div class="info">
-                        <div class="league">${event.leagues[0].name}</div>
-                        <div class="time">${matchTime}</div>
-                        <div class="status-badge">${event.status.type.description}</div>
-                    </div>
-                    <div class="team">
-                        <img src="${away.team.logo}">
-                        <span>${away.team.displayName}</span>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-        });
-
-    } catch (e) {
-        container.innerHTML = '<div class="loading">وقع خطأ، عاود حدّث الصفحة</div>';
-    }
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg,#020617,#020617);
+  color:white;
 }
+header{
+  text-align:center;
+  padding:20px;
+  font-size:26px;
+  color:#38bdf8;
+}
+.match{
+  background:#0f172a;
+  margin:10px;
+  padding:15px;
+  border-radius:10px;
+}
+.teams{
+  font-size:18px;
+  font-weight:bold;
+}
+.time{
+  color:#94a3b8;
+  margin-top:6px;
+}
+</style>
+</head>
 
-fetchMatches();
+<body>
+
+<header>⚽ مباريات اليوم</header>
+
+<div id="matches"></div>
+
+<script>
+// بيانات تجريبية (خدامة دائما)
+const matches = [
+  { teams: "Real Madrid vs Barcelona", time: "21:00" },
+  { teams: "Manchester City vs Arsenal", time: "18:30" },
+  { teams: "PSG vs Marseille", time: "20:45" },
+  { teams: "Wydad vs Raja", time: "22:00" }
+];
+
+let html = "";
+matches.forEach(m => {
+  html += `
+    <div class="match">
+      <div class="teams">${m.teams}</div>
+      <div class="time">⏰ ${m.time}</div>
+    </div>
+  `;
+});
+
+document.getElementById("matches").innerHTML = html;
 </script>
+
+</body>
+</html>
